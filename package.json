@@ -1,7 +1,7 @@
 {
   "name": "mongodb_news_scraper",
   "version": "1.0.0",
-  "description": "",
+  "description": "* Express\r * Express-handlebars\r * Mongoose\r * Axios\r * Cheerio",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -23,7 +23,10 @@
     "express": "^4.17.1",
     "express-handlebars": "^3.1.0",
     "mongodb": "^3.2.7",
+    "mongojs": "^2.6.0",
     "mongoose": "^5.6.4",
-    "morgan": "^1.9.1"
-  }
+    "morgan": "^1.9.1",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {}
 }
