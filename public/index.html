@@ -10,7 +10,12 @@
         body {
             background-color: rgb(131, 184, 243)
         }
-
+        .navbar{
+            background-color: blue;
+            border: 1px solid red;
+            font-size: 30px;
+            text-align: center;
+        }
         #wrapper {
             width: 960px;
             margin-left: auto;
@@ -50,8 +55,10 @@
 </head>
 <body>
     <div id="wrapper"></div>
-    <h1>News Scraper</h1>
-    <h2><i>How to scrape news</i></h2>
+    <nav class="navbar">
+    <h1>Headline News</h1>
+    <h2>How to scrape news</h2>
+    </nav>
     <div id="articles"></div>
     <div id="notes"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

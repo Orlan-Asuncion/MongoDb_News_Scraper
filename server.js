@@ -2,17 +2,14 @@ var express = require("express");
 var logger = require("morgan");
 var mongoose = require("mongoose");
 var hdbrs = require("express-handlebars");
-
-
-
-//Scraping tools
+var bodyParser = require("body-parser");
 var axios = require("axios");
 var cheerio = require("cheerio");
 
 //Require all models
  var db = require("./models");
 
-var PORT =3000;
+var PORT = process.env.PORT || 3000;
 
 //Initialize express
 var app =express();
@@ -26,11 +23,16 @@ app.use(express.json());
 app.use(express.static("public"));
 
 // Connect to the Mongo DB
-mongoose.connect("mongodb://<dbuser>:<dbpassword>@ds253537.mlab.com:53537/heroku_0c7dwjlr", { useNewUrlParser: true });
+
+ var mongoDB = "mongodb://<user>:<password>@ds253537.mlab.com:53537/heroku_0c7dwjlr";
+
+ mongoose.connect(mongoDB,{ useNewUrlParser: true } );
+
+
 
 // Routes
 
-// A GET route for scraping the CNN websites
+// A GET route for scraping the npr websites
 app.get("/scrape", function(req, res) {
   // First, we grab the body of the html with axios
   axios.get("https://www.npr.org/sections/technology/").then(function(response) {
@@ -38,14 +40,17 @@ app.get("/scrape", function(req, res) {
     var $ = cheerio.load(response.data);
 
     // Now, we grab every title within an article tag, and do the following:
-    $("article.title").each(function(i, element) {
+    $("article .title").each(function(i, element) {
       // Save an empty result object
       var result = {};
       //Add the text and href of every link, save them ss properties of the result
-      result.title = $(this)
+      result.title = $(this).children("a").text();
+
+      result.link = $(this)
       .children("a")
       .attr("href");
 
+      console.log(result);
       //Create a new Article using the result object built from scraping
       db.Article.create(result)
       .then(function(dbArticle){
