@@ -16,4 +16,4 @@
 
 # Deployed to Heroku
 
- * Click on the link=("https://newscr2.herokuapp.com")
+ * Click on the link [a link](https://newscr2.herokuapp.com)
