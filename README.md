@@ -14,3 +14,6 @@
 * Heroku
 * Materialize
 
+# Deployed to Heroku
+
+ * Click on the link=("https://newscr2.herokuapp.com")
