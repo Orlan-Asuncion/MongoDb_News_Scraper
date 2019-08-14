@@ -19,7 +19,7 @@ router.get('/', function(req, res) {
 // A GET request to scrape the Verge website
 router.get('/scrape', function(req, res) {
     // First, we grab the body of the html with request
-    request('http://www.theverge.com/tech', function(error, response, html) {
+    request('https://www.npr.org/sections/technology/', function(error, response, html) {
         // Then, we load that into cheerio and save it to $ for a shorthand selector
         var $ = cheerio.load(html);
         var titlesArray = [];
@@ -62,13 +62,13 @@ router.get('/scrape', function(req, res) {
         }
         // Log that scrape is working, just the content was missing parts
         else{
-          console.log('Article already exists.')
+          console.log('Article already exists.');
         }
 
           }
           // Log that scrape is working, just the content was missing parts
           else{
-            console.log('Not saved to DB, missing data')
+            console.log('Not saved to DB, missing data');
           }
         });
         // after scrape, redirects to index
@@ -167,8 +167,8 @@ router.post('/comment/:id', function(req, res) {
       if (err) {
           console.log(err);
       } else {
-          console.log(doc._id)
-          console.log(articleId)
+          console.log(doc._id);
+          console.log(articleId);
           Article.findOneAndUpdate({ "_id": req.params.id }, {$push: {'comment':doc._id}}, {new: true})
             //execute everything
             .exec(function(err, doc) {

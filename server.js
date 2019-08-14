@@ -24,7 +24,7 @@ app.use(express.static("public"));
 
 // Connect to the Mongo DB
 
- var mongoDB = "mongodb://<user>:<password>@ds253537.mlab.com:53537/heroku_0c7dwjlr";
+ var mongoDB = "mongodb://orlando:darryl621@ds253537.mlab.com:53537/heroku_0c7dwjlr";
 
  mongoose.connect(mongoDB,{ useNewUrlParser: true } );
 
