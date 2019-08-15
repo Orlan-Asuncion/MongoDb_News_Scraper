@@ -1,5 +1,5 @@
 .jumbotron {
-    background: url("/assets/img/laptop.jpeg") no-repeat center center;
+    background: url("/public/assets/images/news.jpg") no-repeat center center;
   }
   
   .display-4 {
@@ -13,7 +13,7 @@
   }
   
   .btn-primary {
-    background-color: #345c43;
+    background-color: #21a152;
     color: white !important;
   }
   
