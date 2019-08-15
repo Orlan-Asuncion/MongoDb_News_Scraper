@@ -16,4 +16,4 @@
 
 # Deployed to Heroku
 
- * Click on the link [a link](https://newscr2.herokuapp.com)
+ * To view the app click on the link: [link](https://newscr2.herokuapp.com)
