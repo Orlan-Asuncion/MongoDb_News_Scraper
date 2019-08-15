@@ -1,20 +1,30 @@
-<div>
-    <h1 class="card z-depth-3 center-align">Read the Latest in tech from<br/>'npr'</h1>
-    <div class="row">
-      <div class="col s3"></div>
-      <h5 class="card z-depth-3 center-align col s6">Click 'Scrape' to get the latest articles</h5>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">NPR News Scraper</a>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-item nav-link active" href="/">Home</a>
+      <a class="nav-item nav-link" href="/saved">Saved articles</a>
+      <a class="btn btn-danger scrape-new">Get new articles</a>
     </div>
+  </div>
+</nav>
+
+<div class="jumbotron jumbotron-fluid text-center">
+  <h1 class="display-4">NPR News</h1>
+  <p class="lead">Get the latest from NPR</p>
 </div>
 
-<div class="row">
-  <div class="col s2"></div>
-  <div class ="col s8 left-align">
-    {{#each article}}
-      <div class="card">
-        <h4>{{this.title}}</h4>
-        {{!-- goes to article.handlebars --}}
-        <a href = "/readArticle/{{this._id}}" class="waves-effect waves-light btn blue lighten-1" id="btnSignUp">Read Article</a>
+<div class="container article-container">
+  <h3>Articles</h3>
+  {{#each articles}}
+    <div class="card bg-light mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{{title}}</h5>
+        <a href="{{link}}" class="card-link" target="_blank">View article on NPR</a>
+        <p class="card-text">{{intro}}...</p>
+        <a data-articleId="{{_id}}" class="btn btn-primary save-btn">Save article</a>
       </div>
-    {{/each}}
-  </div>
+    </div>
+  {{/each}}
 </div>
