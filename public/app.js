@@ -16,13 +16,32 @@ $(document).ready(function() {
     );
   });
 
-// get new articles when the button is clicked
-  $(".scrape-new").on("click", function(event) {
-    event.preventDefault();
-    $.get("/scrape", function(data) {
-      window.location.reload();
+// // get new articles when the button is clicked
+//   $(".scrape-new").on("click", function(event) {
+//     event.preventDefault();
+    
+//       window.location.reload();
+//     });
+//   });
+  //click event to scrape new articles
+  $('.scrape-new').on('click', function (e){
+    e.preventDefault();
+    $.ajax({
+      url: '/scrape',
+      type: 'GET',
+      success: function (response) {
+        $('#numArticles').text(response.count);
+      },
+      error: function (error) {
+        console.log(error);
+      },
+      complete: function (result){
+        // alert("Scrape finished.");
+        //  window.location.reload();
+         window.location.href = "/scrape";
+      }
     });
-  });
+  });//end of #scrape click event
 
   // when the button to removed a saved article from the saved list, get the article ID and set its saved property back to false
 

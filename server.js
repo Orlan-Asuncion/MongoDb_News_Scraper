@@ -55,80 +55,80 @@ app.get("/", function(req, res) {
 });
 
 // use cheerio to scrape stories from TechCrunch and store them
+ app.get("/scrape", function(req, res) {
+   request("https:www.npr.org/sections/technology/", function(error, response, html) {
+     // Load the html body from request into cheerio
+     var $ = cheerio.load(html);
+     $("div.post-block").each(function(i, element) {
+
+
+      //trim() removes whitespace because the items return \n and \t before and after the text
+       var title = $(element).find("a.post-block__title__link").text().trim();
+       var link = $(element).find("a.post-block__title__link").attr("href");
+       var intro = $(element).children(".post-block__content").text().trim();
+
+       //if these are present in the scraped data, create an article in the database collection
+       if (title && link && intro) {
+         db.Article.create({
+             title: title,
+             link: link,
+             intro: intro
+           },
+           function(err, inserted) {
+             if (err) {
+              //  log the error if one is encountered during the query
+               console.log(err);
+             } else {
+               // otherwise, log the inserted data
+               console.log(inserted);
+             }
+           });
+         // if there are 10 articles, then return the callback to the frontend
+         console.log(i);
+         if (i === 10) {
+           return res.sendStatus(200);
+         }
+       }
+
+     });
+   });
+ });
+// A GET route for scraping the echoJS website
 // app.get("/scrape", function(req, res) {
-//   request("https://www.npr.org/sections/technology/", function(error, response, html) {
-//     // Load the html body from request into cheerio
-//     var $ = cheerio.load(html);
-//     $("div.post-block").each(function(i, element) {
+//   // First, we grab the body of the html with axios
+//   axios.get("https://technology.inquirer.net").then(function(response) {
+//     // Then, we load that into cheerio and save it to $ for a shorthand selector
+//     var $ = cheerio.load(response.data);
 
+//     // Now, we grab every h2 within an article tag, and do the following:
+//     $("article h2").each(function(i, element) {
+//       // Save an empty result object
+//       var result = {};
 
-//       // trim() removes whitespace because the items return \n and \t before and after the text
-//       var title = $(element).find("a.post-block__title__link").text().trim();
-//       var link = $(element).find("a.post-block__title__link").attr("href");
-//       var intro = $(element).children(".post-block__content").text().trim();
+//       // Add the text and href of every link, and save them as properties of the result object
+//       result.title = $(this)
+//         .children("a")
+//         .text();
+//       result.link = $(this)
+//         .children("a")
+//         .attr("href");
 
-//       // if these are present in the scraped data, create an article in the database collection
-//       if (title && link && intro) {
-//         db.Article.create({
-//             title: title,
-//             link: link,
-//             intro: intro
-//           },
-//           function(err, inserted) {
-//             if (err) {
-//               // log the error if one is encountered during the query
-//               console.log(err);
-//             } else {
-//               // otherwise, log the inserted data
-//               console.log(inserted);
-//             }
-//           });
-//         // if there are 10 articles, then return the callback to the frontend
-//         console.log(i);
-//         if (i === 10) {
-//           return res.sendStatus(200);
-//         }
-//       }
-
+//       // Create a new Article using the `result` object built from scraping
+//       db.Article.create(result)
+//         .then(function(dbArticle) {
+//           // View the added result in the console
+//           console.log(dbArticle);
+//         })
+//         .catch(function(err) {
+//           // If an error occurred, log it
+//           console.log(err);
+//         });
 //     });
+
+//     // Send a message to the client
+//     res.send("Scrape Complete");
 //   });
 // });
-// A GET route for scraping the echoJS website
-app.get("/scrape", function(req, res) {
-  // First, we grab the body of the html with axios
-  axios.get("https://technology.inquirer.net").then(function(response) {
-    // Then, we load that into cheerio and save it to $ for a shorthand selector
-    var $ = cheerio.load(response.data);
-
-    // Now, we grab every h2 within an article tag, and do the following:
-    $("article h2").each(function(i, element) {
-      // Save an empty result object
-      var result = {};
-
-      // Add the text and href of every link, and save them as properties of the result object
-      result.title = $(this)
-        .children("a")
-        .text();
-      result.link = $(this)
-        .children("a")
-        .attr("href");
-
-      // Create a new Article using the `result` object built from scraping
-      db.Article.create(result)
-        .then(function(dbArticle) {
-          // View the added result in the console
-          console.log(dbArticle);
-        })
-        .catch(function(err) {
-          // If an error occurred, log it
-          console.log(err);
-        });
-    });
-
-    // Send a message to the client
-    res.send("Scrape Complete");
-  });
-});
 
 // route for retrieving all the saved articles
 app.get("/saved", function(req, res) {
