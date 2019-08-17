@@ -1,38 +1,32 @@
 var express = require("express");
-var logger = require("morgan");
 var mongoose = require("mongoose");
-var hdbrs = require("express-handlebars");
-var bodyParser = require("body-parser");
-var axios = require("axios");
+var request = require("request");
 var cheerio = require("cheerio");
-
-//Require all models
- var db = require("./models");
+var bodyParser = require("body-parser");
+var hdbrs = require("express-handlebars");
 
 var PORT = process.env.PORT || 3000;
 
-//Initialize express
-var app =express();
-//use body-parser for handling submissions
+// initialize Express
+var app = express();
+
+// use body-parser for handling form submissions
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 app.use(bodyParser.json({
   type: "application/json"
 }));
-// Parse request body as JSON
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-// Make public a static folder
+
+// serve the public directory
 app.use(express.static("public"));
-
 // Connect to the Mongo DB
-
- var mongoDB = "mongodb://orlando:darryl621@ds253537.mlab.com:53537/heroku_0c7dwjlr";
+var databaseUrl = "news";
+mongoose.Promise = Promise;
+var mongoDB = "mongodb://orlando:darryl621@ds253537.mlab.com:53537/heroku_0c7dwjlr";
 
  mongoose.connect(mongoDB,{ useNewUrlParser: true } );
 
-// use handlebars
-// app.engine("handlebars", exphbs({
-//   defaultLayout: "main"
-// }));
 app.engine("handlebars", hdbrs({
   defaultlayout: "main"
 }));
@@ -40,6 +34,7 @@ app.set("view engine", "handlebars");
 
 // Hook mongojs configuration to the db variable
 var db = require("./models");
+
 
 // get all articles from the database that are not saved
 app.get("/", function(req, res) {
@@ -58,77 +53,100 @@ app.get("/", function(req, res) {
       }
     });
 });
-// use cheerio to scrape stories from npr.org and store them
+
+// use cheerio to scrape stories from TechCrunch and store them
+// app.get("/scrape", function(req, res) {
+//   request("https://www.npr.org/sections/technology/", function(error, response, html) {
+//     // Load the html body from request into cheerio
+//     var $ = cheerio.load(html);
+//     $("div.post-block").each(function(i, element) {
+
+
+//       // trim() removes whitespace because the items return \n and \t before and after the text
+//       var title = $(element).find("a.post-block__title__link").text().trim();
+//       var link = $(element).find("a.post-block__title__link").attr("href");
+//       var intro = $(element).children(".post-block__content").text().trim();
+
+//       // if these are present in the scraped data, create an article in the database collection
+//       if (title && link && intro) {
+//         db.Article.create({
+//             title: title,
+//             link: link,
+//             intro: intro
+//           },
+//           function(err, inserted) {
+//             if (err) {
+//               // log the error if one is encountered during the query
+//               console.log(err);
+//             } else {
+//               // otherwise, log the inserted data
+//               console.log(inserted);
+//             }
+//           });
+//         // if there are 10 articles, then return the callback to the frontend
+//         console.log(i);
+//         if (i === 10) {
+//           return res.sendStatus(200);
+//         }
+//       }
+
+//     });
+//   });
+// });
+// A GET route for scraping the echoJS website
 app.get("/scrape", function(req, res) {
-  request("https://www.npr.org/sections/technology/", function(error, response, html) {
-    // Load the html body from request into cheerio
-    var $ = cheerio.load(html);
-    $("div.post-block").each(function(i, element) {
+  // First, we grab the body of the html with axios
+  axios.get("https://technology.inquirer.net").then(function(response) {
+    // Then, we load that into cheerio and save it to $ for a shorthand selector
+    var $ = cheerio.load(response.data);
 
-      // trim() removes whitespace because the items return \n and \t before and after the text
-      var title = $(element).find("a.post-block__title__link").text().trim();
-      var link = $(element).find("a.post-block__title__link").attr("href");
-      var intro = $(element).children(".post-block__content").text().trim();
+    // Now, we grab every h2 within an article tag, and do the following:
+    $("article h2").each(function(i, element) {
+      // Save an empty result object
+      var result = {};
 
-      // if these are present in the scraped data, create an article in the database collection
-      if (title && link && intro) {
-        db.Article.create({
-            title: title,
-            link: link,
-            intro: intro
-          },
-          function(err, inserted) {
-            if (err) {
-              // log the error if one is encountered during the query
-              console.log(err);
-            } else {
-              // otherwise, log the inserted data
-              console.log(inserted);
-            }
-          });
-        // if there are 10 articles, then return the callback to the frontend
-        console.log(i);
-        if (i === 10) {
-          return res.sendStatus(200);
-        }
-      }
+      // Add the text and href of every link, and save them as properties of the result object
+      result.title = $(this)
+        .children("a")
+        .text();
+      result.link = $(this)
+        .children("a")
+        .attr("href");
+
+      // Create a new Article using the `result` object built from scraping
+      db.Article.create(result)
+        .then(function(dbArticle) {
+          // View the added result in the console
+          console.log(dbArticle);
+        })
+        .catch(function(err) {
+          // If an error occurred, log it
+          console.log(err);
+        });
     });
+
+    // Send a message to the client
+    res.send("Scrape Complete");
   });
 });
 
 // route for retrieving all the saved articles
- app.get("/saved", function(req, res) {
-   db.Article.find({
-       saved: true
-     })
-     .then(function(dbArticle) {
-       // if successful, then render with the handlebars saved page
-       res.render("saved", {
-         articles: dbArticle
-       });
-     })
-     .catch(function(err) {
+app.get("/saved", function(req, res) {
+  db.Article.find({
+      saved: true
+    })
+    .then(function(dbArticle) {
+      // if successful, then render with the handlebars saved page
+      res.render("saved", {
+        articles: dbArticle
+      });
+    })
+    .catch(function(err) {
       // If an error occurs, send the error back to the client
-       res.json(err);
-     });
+      res.json(err);
     });
-// });
-// app.put("./saved/:id", function(req, res) {
-//      db.Article.findByIdAndUpdate(
-//          req.params.id, {
-//            $set: req.body
-//          }, {
-//            new: true
-//          })
-//        .then(function(dbArticle) {
-//          res.render("saved", {
-//            articles: dbArticle
-//          });
-//        })
-//        .catch(function(err) {
-//          res.json(err);
-//        });
-//    });
+
+});
 
 // route for setting an article to saved
 app.put("/saved/:id", function(req, res) {
@@ -193,28 +211,9 @@ app.get("/notes/:id", function(req, res) {
   });
 });
 
-// Routes
-
-// A GET route for scraping the npr websites
-// app.get("/scrape", function(req, res) {
-//   // First, we grab the body of the html with axios
-//   axios.get("https://www.npr.org/sections/technology/").then(function(response) {
-//     // Then, we load that into cheerio and save it to $ for a shorthand selector
-//     var $ = cheerio.load(response.data);
-
-//     // Now, we grab every title within an article tag, and do the following:
-//     $("article .title").each(function(i, element) {
-//       // Save an empty result object
-//       var result = {};
-//       //Add the text and href of every link, save them ss properties of the result
-//       result.title = $(this).children("a").text();
-
-//       result.link = $(this)
-//       .children("a")
-//       .attr("href");
-
 
 // Start the server
 app.listen(PORT, function() {
   console.log("App running on port " + PORT + "!");
 });
+

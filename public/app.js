@@ -1,8 +1,5 @@
 $(document).ready(function() {
 
-
-
-
   // when the save button is clicked, get the article ID and set its saved property to true
   $(".save-btn").on("click", function(event) {
     var newSavedArticle = $(this).data();
@@ -109,6 +106,4 @@ $(document).ready(function() {
         $("#" + noteID).remove();
       });
   });
-
 });
-  
